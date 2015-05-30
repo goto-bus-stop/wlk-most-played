@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SekshiBot Most Played
  * Description: Lists most played songs as recorded in MongoDB by SekshiBot.
- * Version: 0.1.1
+ * Version: 0.2.0
  * Author: WE ♥ KPOP
  * Author URI: https://welovekpop.club/
  * License: MIT
