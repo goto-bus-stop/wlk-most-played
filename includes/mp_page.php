@@ -52,7 +52,7 @@ function getPage(
 
     $mongo = getMongo();
 
-    $sekshiDb = $mongo->sekshi;
+    $sekshiDb = $mongo->{get_option('wlkmp_mongo_name')};
 
     $historyCollection = $sekshiDb->historyentries;
     $mediaCollection = $sekshiDb->media;

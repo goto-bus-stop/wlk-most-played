@@ -108,9 +108,11 @@ function init()
 function registerSettings()
 {
     register_setting('wlkmp_options', 'wlkmp_mongo_uri');
+    register_setting('wlkmp_options', 'wlkmp_mongo_name');
 }
 
 add_option('wlkmp_mongo_uri', 'mongodb://localhost:27017/');
+add_option('wlkmp_mongo_name', 'sekshi');
 
 add_action('wp_ajax_most_played', 'WeLoveKpop\MostPlayed\ajaxHandler');
 add_action('wp_ajax_nopriv_most_played', 'WeLoveKpop\MostPlayed\ajaxHandler');

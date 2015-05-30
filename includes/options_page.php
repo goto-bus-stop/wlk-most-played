@@ -12,6 +12,7 @@ if (!defined('WPINC')) {
 function showOptionsPage()
 {
     $mongo_uri = esc_attr(get_option('wlkmp_mongo_uri'));
+    $mongo_name = esc_attr(get_option('wlkmp_mongo_name'));
     ?>
     <div class="wrap">
         <h2><?php echo __('SekshiBot Most Played Songs Options') ?></h2>
@@ -26,6 +27,15 @@ function showOptionsPage()
                                class="regular-text"
                                name="wlkmp_mongo_uri"
                                value="<?php echo $mongo_uri ?>" />
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">MongoDB Database Name</th>
+                    <td>
+                        <input type="text"
+                               class="regular-text"
+                               name="wlkmp_mongo_name"
+                               value="<?php echo $mongo_name ?>" />
                     </td>
                 </tr>
             </table>

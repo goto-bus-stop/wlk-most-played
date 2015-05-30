@@ -12,8 +12,8 @@ Then, clone this repo to your `wp-content/plugins` directory, or extract this
 [zip file](https://github.com/welovekpop/wlk-most-played/archive/master.zip) in
 `wp-content/plugins/wlk-most-played`.
 
-After enabling it, configure your MongoDB URI in the Settings » Most Played
-Songs screen.
+After enabling it, configure your MongoDB URI and database name in the
+Settings » Most Played Songs screen.
 
 ## Usage
 
