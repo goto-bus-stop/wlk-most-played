@@ -117,7 +117,7 @@ function getPage(
     );
 
     $recordsTotal = $historyCollection->aggregate(
-        [ '$match' => [ 'media' => [ '$ne' => null ] ] ],
+        [ '$match' => $match ],
         [ '$group' => [ '_id' => '$media' ] ],
         [ '$group' => [ '_id' => 1, 'count' => [ '$sum' => 1 ] ] ]
     )['result'][0]['count'];
