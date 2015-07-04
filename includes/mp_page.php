@@ -61,11 +61,26 @@ function getPage(
         ? \MongoCollection::ASCENDING
         : \MongoCollection::DESCENDING;
 
+    $match = [
+        'time' => [ '$gte' => new \MongoDate(0) ],
+        'media' => [ '$ne' => null ]
+    ];
+    $ids = [];
+    if (!empty($search['value'])) {
+        $rx = new \MongoRegex('/' . preg_quote($search['value'], '/') . '/i');
+        $query = $mediaCollection->find([
+            '$or' => [
+                [ 'author' => $rx ],
+                [ 'title' => $rx ]
+            ]
+        ], [ '_id' => 1 ]);
+        foreach ($query as $m) {
+            $ids[] = $m['_id'];
+        }
+        $match['media'] = [ '$in' => $ids ];
+    }
     $pipeline = [
-        [ '$match'   => [
-            'time' => [ '$gte' => new \MongoDate(0) ],
-            'media' => [ '$ne' => null ]
-        ] ],
+        [ '$match'   => $match ],
         [ '$group'   => [ '_id' => '$media', 'count' => [ '$sum' => 1 ] ] ],
         [ '$sort'    => [ 'count' => $sortOrder, '_id' => $sortOrder ] ],
         [ '$skip'    => $start ],

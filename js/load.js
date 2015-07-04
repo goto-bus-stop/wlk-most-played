@@ -10,15 +10,15 @@ jQuery('#most-played').DataTable({
       success: cb
     });
   },
-  searching: false,
+  searching: true,
   pageLength: 50,
   order: [ [ 2, 'desc' ] ],
   columns: [
     { data: function (row, type, set, cell) {
       return '#' + (cell.settings.oAjaxData.start + cell.row + 1)
     } },
-    { orderable: false, data: 0 },
-    { orderable: false, data: 1 },
+    { orderable: false, searchable: true, data: 0 },
+    { orderable: false, searchable: true, data: 1 },
     { data: 2 }
   ]
 })
