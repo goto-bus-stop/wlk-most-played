@@ -182,4 +182,54 @@ class MostPlayedPage
             </table>
         ';
     }
+
+    /**
+     * Shortcode handler for the most played listing. Mostly adds javascript
+     * and a wrapper div.
+     *
+     * @return string
+     */
+    public static function shortcode()
+    {
+        $mp = new self();
+
+        wp_enqueue_script(
+            'datatables',
+            'https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js',
+            [ 'jquery' ]
+        );
+        wp_enqueue_style(
+            'datatables-css',
+            plugins_url('../css/datatables.css', __FILE__)
+        );
+        wp_enqueue_script(
+            'sekshi-most-played',
+            plugins_url('../js/load.js', __FILE__),
+            [ 'jquery', 'datatables' ]
+        );
+        wp_localize_script(
+            'sekshi-most-played',
+            '_mp_ajax',
+            [ 'ajax_url' => admin_url('admin-ajax.php') ]
+        );
+
+        return $mp->render();
+    }
+
+    /**
+     * Most played list ajax handler.
+     *
+     * @return void
+     */
+    public static function ajaxHandler()
+    {
+        $mp = new self();
+        echo $mp->datatables(
+            isset($_POST['start']) ? (int) $_POST['start'] : 0,
+            isset($_POST['limit']) ? (int) $_POST['limit'] : 50,
+            isset($_POST['order']) ? $_POST['order'][0]['dir'] : 'desc',
+            isset($_POST['search']) ? $_POST['search'] : []
+        );
+        wp_die();
+    }
 }

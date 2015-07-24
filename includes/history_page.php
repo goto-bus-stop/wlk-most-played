@@ -90,4 +90,19 @@ class HistoryPage
 
         return $html;
     }
+
+    /**
+     * Shortcode handler for the history list.
+     *
+     * @return string
+     */
+    public static function shortcode()
+    {
+        wp_enqueue_style(
+            'wlkmp-history-css',
+            plugins_url('../css/history.css', __FILE__)
+        );
+        $p = new self();
+        return $p->render();
+    }
 }
