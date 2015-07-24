@@ -10,20 +10,6 @@ if (!defined('WPINC')) {
 }
 
 /**
- * Creates a MongoDB connection.
- *
- * @return \MongoClient
- */
-function getMongo()
-{
-    static $db;
-    if (!$db) {
-        $db = new \MongoClient(get_option('wlkmp_mongo_uri'));
-    }
-    return $db;
-}
-
-/**
  * Gets a page worth of play records.
  *
  * @param int   $start  First record to return.
@@ -50,9 +36,7 @@ function getPage(
         return $json;
     }
 
-    $mongo = getMongo();
-
-    $sekshiDb = $mongo->{get_option('wlkmp_mongo_name')};
+    $sekshiDb = getMongoDb();
 
     $historyCollection = $sekshiDb->historyentries;
     $mediaCollection = $sekshiDb->media;

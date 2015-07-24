@@ -14,6 +14,8 @@ if (!defined('WPINC')) {
     exit;
 }
 
+require_once plugin_dir_path(__FILE__) . 'includes/mongo.php';
+require_once plugin_dir_path(__FILE__) . 'includes/history_page.php';
 require_once plugin_dir_path(__FILE__) . 'includes/mp_page.php';
 require_once plugin_dir_path(__FILE__) . 'includes/options_page.php';
 
@@ -78,6 +80,16 @@ function shortcode()
     ';
 }
 
+function shortcodeHistory()
+{
+    wp_enqueue_style(
+        'wlkmp-history-css',
+        plugins_url('css/history.css', __FILE__)
+    );
+    $p = new HistoryPage();
+    return $p->render();
+}
+
 /**
  * "menu" hook, adds the MostPlayed options page.
  */
@@ -100,6 +112,7 @@ function menu()
 function init()
 {
     add_shortcode('sekshi-most-played', 'WeLoveKpop\MostPlayed\shortcode');
+    add_shortcode('sekshi-history', 'WeLoveKpop\MostPlayed\shortcodeHistory');
 }
 
 /**
