@@ -1,6 +1,6 @@
 <?php
 /**
- * Functions for actually building the page.
+ * Contains the Most Played page class.
  */
 
 namespace WeLoveKpop\MostPlayed;
@@ -10,108 +10,180 @@ if (!defined('WPINC')) {
 }
 
 /**
- * Gets a page worth of play records.
- *
- * @param int   $start  First record to return.
- * @param int   $limit  Amount of records to return.
- * @param array $order  Array of DataTable sorting options. Not intended for
- *                      use by people. :eyes:
- * @param array $search Not used.
- *
- * @return array
+ * Class for rendering the most played page.
  */
-function getPage(
-    $start = 0,
-    $limit = 50,
-    $order = 'desc',
-    $search = []
-) {
-
-    $key = 'sekshibot-mostplayed/' . md5(
-        $start . '-' . $limit . serialize($order) . implode('-', $search)
-    );
-    if (apc_exists($key)) {
-        $json = apc_fetch($key);
-        $json['fromcache'] = true;
-        return $json;
+class MostPlayedPage
+{
+    /**
+     * Initialises the Most Played page.
+     */
+    public function __construct()
+    {
+        $this->history = getMongoDb()->historyentries;
+        $this->media = getMongoDb()->media;
     }
 
-    $sekshiDb = getMongoDb();
-
-    $historyCollection = $sekshiDb->historyentries;
-    $mediaCollection = $sekshiDb->media;
-
-    $sortOrder = $order === 'asc'
-        ? \MongoCollection::ASCENDING
-        : \MongoCollection::DESCENDING;
-
-    $match = [
-        'time' => [ '$gte' => new \MongoDate(0) ],
-        'media' => [ '$ne' => null ]
-    ];
-    $ids = [];
-    if (!empty($search['value'])) {
-        $rx = new \MongoRegex('/' . preg_quote($search['value'], '/') . '/i');
-        $query = $mediaCollection->find([
-            '$or' => [
-                [ 'author' => $rx ],
-                [ 'title' => $rx ]
-            ]
-        ], [ '_id' => 1 ]);
-        foreach ($query as $m) {
-            $ids[] = $m['_id'];
+    /**
+     * Memoized count($media).
+     *
+     * @return integer
+     */
+    protected function countMedia()
+    {
+        static $m = null;
+        if (is_null($m)) {
+            $m = $this->media->count();
         }
-        $match['media'] = [ '$in' => $ids ];
-    }
-    $pipeline = [
-        [ '$match'   => $match ],
-        [ '$group'   => [ '_id' => '$media', 'count' => [ '$sum' => 1 ] ] ],
-        [ '$sort'    => [ 'count' => $sortOrder, '_id' => $sortOrder ] ],
-        [ '$skip'    => $start ],
-        [ '$limit'   => $limit ],
-        [ '$project' => [ '_id' => 1, 'count' => 1 ] ]
-    ];
-    $res = $historyCollection->aggregate($pipeline);
-
-    $ids = [];
-    $playcounts = [];
-    foreach ($res['result'] as $entry) {
-        $ids[] = $entry['_id'];
-        $playcounts[(string) $entry['_id']] = $entry['count'];
+        return $m;
     }
 
-    $media = $mediaCollection->find([ '_id' => [ '$in' => $ids ] ]);
-    $data = [];
-
-    foreach ($media as $m) {
-        $data[] = [
-            $m['author'],
-            $m['title'],
-            $playcounts[(string) $m['_id']]
+    /**
+     * Finds & sorts the most played media, optionally filtered by a search
+     * query.
+     *
+     * @param integer $start  First record to return.
+     * @param integer $limit  Amount of records to return.
+     * @param integer $order  Sort order. A \MongoCollection::*SCENDING constant.
+     * @param string  $search Search query.
+     *
+     * @return array Results. ['data'] contains media entries with an additional
+     *               ['plays'] property. ['count'] contains the total result
+     *               count.
+     */
+    protected function getMostPlayed(
+        $start = 0,
+        $limit = 50,
+        $order = \MongoCollection::DESCENDING,
+        $search = ''
+    ) {
+        $match = [
+            'time' => [ '$gte' => new \MongoDate(0) ],
+            'media' => [ '$ne' => null ]
         ];
+
+        $ids = [];
+        if (!empty($search)) {
+            $rx = new \MongoRegex('/' . preg_quote($search, '/') . '/i');
+            $query = $this->media->find(
+                [
+                    '$or' => [
+                        [ 'author' => $rx ],
+                        [ 'title' => $rx ]
+                    ]
+                ],
+                [ '_id' => 1 ]
+            );
+            foreach ($query as $m) {
+                $ids[] = $m['_id'];
+            }
+            $match['media'] = [ '$in' => $ids ];
+        }
+
+        $pipeline = [
+            [ '$match'   => $match ],
+            [ '$group'   => [ '_id' => '$media', 'count' => [ '$sum' => 1 ] ] ],
+            [ '$sort'    => [ 'count' => $order, '_id' => $order ] ],
+            [ '$skip'    => $start ],
+            [ '$limit'   => $limit ],
+            [ '$project' => [ '_id' => 1, 'count' => 1 ] ]
+        ];
+        $res = $this->history->aggregate($pipeline);
+
+        $playcounts = [];
+        foreach ($res['result'] as $entry) {
+            $playcounts[(string) $entry['_id']] = $entry['count'];
+        }
+
+        $medias = iterator_to_array(
+            $this->media->find(
+                [ '_id' => [ '$in' => array_column($res['result'], '_id') ] ]
+            )
+        );
+
+        $sorted = array_map(
+            function ($media) use ($playcounts) {
+                $media['plays'] = $playcounts[$media['_id']];
+                return $media;
+            },
+            $medias
+        );
+        usort(
+            $sorted,
+            function ($a, $b) {
+                return $a['plays'] > $b['plays'] ? 1 : -1;
+            }
+        );
+
+        $count = $search ? count($ids) : $this->countMedia();
+
+        $data = $order === \MongoCollection::ASCENDING
+            ? $sorted
+            : array_reverse($sorted);
+
+        return compact('data', 'count');
     }
 
-    usort(
-        $data,
-        function ($a, $b) use ($order) {
-            // 2 = playcounts
-            $value = $a[2] > $b[2] ? 1 : -1;
-            return $order === 'desc' ? -$value : $value;
-        }
-    );
+    /**
+     * Builds most played page JSON objects for DataTables.
+     *
+     * @param integer $start  See getMostPlayed.
+     * @param integer $limit  See getMostPlayed.
+     * @param string  $order  Sort order, either "desc" or "asc".
+     * @param array   $search DataTables search object. Only the ['value']
+     *                        property is supported.
+     *
+     * @return string JSON.
+     */
+    public function datatables(
+        $start = 0,
+        $limit = 50,
+        $order = 'desc',
+        $search = []
+    ) {
+        $order = $order === 'asc'
+            ? \MongoCollection::ASCENDING
+            : \MongoCollection::DESCENDING;
+        $search = !empty($search['value']) ? $search['value'] : null;
 
-    $recordsTotal = $historyCollection->aggregate(
-        [ '$match' => $match ],
-        [ '$group' => [ '_id' => '$media' ] ],
-        [ '$group' => [ '_id' => 1, 'count' => [ '$sum' => 1 ] ] ]
-    )['result'][0]['count'];
+        $mostPlayed = $this->getMostPlayed($start, $limit, $order, $search);
+        $data = array_map(
+            function ($m) {
+                return array_map(
+                    'esc_html',
+                    [ $m['author'], $m['title'], $m['plays'] ]
+                );
+            },
+            $mostPlayed['data']
+        );
 
-    $json = [
-        'data' => $data,
-        'recordsTotal' => $recordsTotal,
-        'recordsFiltered' => $recordsTotal
-    ];
-    apc_store($key, $json, 5 * 60);
+        $json = [
+            'data' => $data,
+            'recordsTotal' => $this->countMedia(),
+            'recordsFiltered' => $mostPlayed['count']
+        ];
 
-    return $json;
+        return json_encode($json);
+    }
+
+    /**
+     * Renders initial table HTML. Not much going on! :)
+     *
+     * @return string Empty table.
+     */
+    public function render()
+    {
+        return '
+            <table id="most-played">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Artist</th>
+                        <th>Title</th>
+                        <th>Play Count</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        ';
+    }
 }

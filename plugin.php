@@ -26,13 +26,12 @@ require_once plugin_dir_path(__FILE__) . 'includes/options_page.php';
  */
 function ajaxHandler()
 {
-    echo json_encode(
-        getPage(
-            isset($_POST['start']) ? (int) $_POST['start'] : 0,
-            isset($_POST['limit']) ? (int) $_POST['limit'] : 50,
-            isset($_POST['order']) ? $_POST['order'][0]['dir'] : 'desc',
-            isset($_POST['search']) ? $_POST['search'] : []
-        )
+    $mp = new MostPlayedPage();
+    echo $mp->datatables(
+        isset($_POST['start']) ? (int) $_POST['start'] : 0,
+        isset($_POST['limit']) ? (int) $_POST['limit'] : 50,
+        isset($_POST['order']) ? $_POST['order'][0]['dir'] : 'desc',
+        isset($_POST['search']) ? $_POST['search'] : []
     );
     wp_die();
 }
@@ -43,8 +42,10 @@ function ajaxHandler()
  *
  * @return string
  */
-function shortcode()
+function shortcodeMostPlayed()
 {
+    $mp = new MostPlayedPage();
+
     wp_enqueue_script(
         'datatables',
         'https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js',
@@ -65,19 +66,7 @@ function shortcode()
         [ 'ajax_url' => admin_url('admin-ajax.php') ]
     );
 
-    return '
-        <table id="most-played">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Artist</th>
-                    <th>Title</th>
-                    <th>Play Count</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    ';
+    return $mp->render();
 }
 
 function shortcodeHistory()
@@ -111,7 +100,7 @@ function menu()
  */
 function init()
 {
-    add_shortcode('sekshi-most-played', 'WeLoveKpop\MostPlayed\shortcode');
+    add_shortcode('sekshi-most-played', 'WeLoveKpop\MostPlayed\shortcodeMostPlayed');
     add_shortcode('sekshi-history', 'WeLoveKpop\MostPlayed\shortcodeHistory');
 }
 
