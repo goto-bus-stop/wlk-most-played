@@ -5,10 +5,6 @@
 
 namespace WeLoveKpop\MostPlayed;
 
-if (!defined('WPINC')) {
-    exit;
-}
-
 function showOptionsPage()
 {
     $mongo_uri = esc_attr(get_option('wlkmp_mongo_uri'));

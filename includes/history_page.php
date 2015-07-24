@@ -5,10 +5,6 @@
 
 namespace WeLoveKpop\MostPlayed;
 
-if (!defined('WPINC')) {
-    exit;
-}
-
 class HistoryPage
 {
     public function __construct()
@@ -62,13 +58,14 @@ class HistoryPage
             $entry = $item['entry'];
 
             $score = $entry['score'];
+            $title = $media['author'] . ' - ' . $media['title'];
             $time = $entry['time']->toDateTime()->format('Y-m-d H:i:s');
 
             $html .= '
                 <div class="history-entry">
                     <img src="' . esc_attr($media['image']) . '" alt="Image">
                     <div class="meta">
-                        <span class="media">' . esc_html($media['author']) . ' - ' . esc_html($media['title']) . '</span>
+                        <span class="media">' . esc_html($title) . '</span>
                         <span class="dj">' . esc_html($dj['username']) . '</span>
                         <span class="time">' . esc_html($time) . '</span>
                     </div>

@@ -4,10 +4,6 @@
  */
 namespace WeLoveKpop\MostPlayed;
 
-if (!defined('WPINC')) {
-    exit;
-}
-
 /**
  * Creates a MongoDB connection.
  *

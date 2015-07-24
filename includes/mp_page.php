@@ -5,10 +5,6 @@
 
 namespace WeLoveKpop\MostPlayed;
 
-if (!defined('WPINC')) {
-    exit;
-}
-
 /**
  * Class for rendering the most played page.
  */
