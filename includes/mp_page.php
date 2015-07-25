@@ -98,7 +98,7 @@ class MostPlayedPage
 
         $sorted = array_map(
             function ($media) use ($playcounts) {
-                $media['plays'] = $playcounts[$media['_id']];
+                $media['plays'] = $playcounts[(string) $media['_id']];
                 return $media;
             },
             $medias
