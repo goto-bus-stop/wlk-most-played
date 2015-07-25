@@ -97,4 +97,14 @@
             }
         /* /.listeners */
     /* /.score */
+    .history .paginate {
+        clear: both;
+    }
+        .history .paginate .next {
+            float: right;
+        }
+        .history .paginate .prev {
+            float: left;
+        }
+    /* /.paginate */
 /* /.history */

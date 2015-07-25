@@ -31,6 +31,14 @@ add_action(
     'wp_ajax_nopriv_most_played',
     'WeLoveKpop\MostPlayed\MostPlayedPage::ajaxHandler'
 );
+add_action(
+    'wp_ajax_sekshi_history',
+    'WeLoveKpop\MostPlayed\HistoryPage::ajaxHandler'
+);
+add_action(
+    'wp_ajax_nopriv_sekshi_history',
+    'WeLoveKpop\MostPlayed\HistoryPage::ajaxHandler'
+);
 add_action('init', 'WeLoveKpop\MostPlayed\Plugin::init');
 if (is_admin()) {
     add_action('admin_menu', 'WeLoveKpop\MostPlayed\Plugin::menu');

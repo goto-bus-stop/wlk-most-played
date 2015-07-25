@@ -14,12 +14,27 @@ class HistoryPage
         $this->users = getMongoDb()->users;
     }
 
-    protected function getLast($n)
+    protected function getFilter()
+    {
+        return [ 'media' => [ '$ne' => null ] ];
+    }
+
+    protected function countFiltered()
+    {
+        static $c = null;
+        if (is_null($c)) {
+            $c = $this->collection->count($this->getFilter());
+        }
+        return $c;
+    }
+
+    protected function getLast($start, $n)
     {
         $entries = iterator_to_array(
             $this->collection
-                ->find([ 'media' => [ '$ne' => null ] ])
+                ->find($this->getFilter())
                 ->sort([ 'time' => -1 ])
+                ->skip($start)
                 ->limit($n)
         );
         $medias = $this->media->find([
@@ -47,11 +62,12 @@ class HistoryPage
         }, $entries);
     }
 
-    public function render($n = 50)
+    public function render($start = 0, $n = 50)
     {
-        $data = $this->getLast($n);
+        $data = $this->getLast($start, $n);
 
         $html = '<div class="history">';
+        $html .= '<div class="history-list">';
         foreach ($data as $item) {
             $media = $item['media'];
             $dj = $item['dj'];
@@ -86,9 +102,44 @@ class HistoryPage
                 </div>
             ';
         }
-        $html .= '</div>';
+
+        $html .= '
+                </div>
+                <div class="paginate">
+                    <button class="previous">Previous</button>
+                    <button class="next">Next</button>
+                </div>
+            </div>
+        ';
 
         return $html;
+    }
+
+    /**
+     * Enqueue things for wordpress.
+     *
+     * @return void
+     */
+    public function enqueue()
+    {
+        wp_enqueue_style(
+            'wlkmp-history-css',
+            plugins_url('../css/history.css', __FILE__)
+        );
+        wp_enqueue_script(
+            'sekshi-history',
+            plugins_url('../js/history.js', __FILE__),
+            [ 'jquery' ]
+        );
+        wp_localize_script(
+            'sekshi-history',
+            '_sekshi_history',
+            [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'page' => 0,
+                'lastPage' => ceil($this->countFiltered() / 50)
+            ]
+        );
     }
 
     /**
@@ -98,11 +149,20 @@ class HistoryPage
      */
     public static function shortcode()
     {
-        wp_enqueue_style(
-            'wlkmp-history-css',
-            plugins_url('../css/history.css', __FILE__)
-        );
         $p = new self();
+        $p->enqueue();
         return $p->render();
+    }
+
+    /**
+     * History list ajax handler.
+     *
+     * @return void
+     */
+    public static function ajaxHandler()
+    {
+        $p = new self();
+        echo $p->render(isset($_POST['page']) ? (int) $_POST['page'] * 50 : 0);
+        wp_die();
     }
 }
