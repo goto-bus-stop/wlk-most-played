@@ -7,16 +7,22 @@ namespace WeLoveKpop\MostPlayed;
 
 class HistoryPage
 {
-    public function __construct()
+    public function __construct($filter = null)
     {
         $this->collection = Mongo::collection('historyentries');
         $this->media = Mongo::collection('media');
         $this->users = Mongo::collection('users');
+
+        $this->filter = $filter;
     }
 
     protected function getFilter()
     {
-        return [ 'media' => [ '$ne' => null ] ];
+        $filter = [ 'media' => [ '$ne' => null ] ];
+        if (is_array($this->filter)) {
+            $filter = array_merge($filter, $this->filter);
+        }
+        return $filter;
     }
 
     protected function countFiltered()
@@ -136,6 +142,7 @@ class HistoryPage
             '_sekshi_history',
             [
                 'ajax_url' => admin_url('admin-ajax.php'),
+                'filter' => $this->filter,
                 'page' => 0,
                 'lastPage' => ceil($this->countFiltered() / 50)
             ]
@@ -161,7 +168,7 @@ class HistoryPage
      */
     public static function ajaxHandler()
     {
-        $p = new self();
+        $p = new self(isset($_POST['filter']) ? $_POST['filter'] : null);
         echo $p->render(isset($_POST['page']) ? (int) $_POST['page'] * 50 : 0);
         wp_die();
     }

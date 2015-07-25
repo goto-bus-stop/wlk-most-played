@@ -14,19 +14,23 @@
     show(_sekshi_history.page + 1);
   });
 
-  if (_sekshi_history.page < 1) {
-    prev.addClass('hide');
-  }
+  update();
 
   function show(page) {
     list.load(_sekshi_history.ajax_url + ' .history-list', {
       action: 'sekshi_history',
+      filter: _sekshi_history.filter,
       page: page
     }, function () {
       _sekshi_history.page = page;
-      prev.toggleClass('hide', page < 1);
-      next.toggleClass('hide', page + 1 >= _sekshi_history.lastPage);
+      update();
     });
+  }
+
+  function update() {
+    var page = parseInt(_sekshi_history.page, 10)
+    prev.toggleClass('hide', page < 1);
+    next.toggleClass('hide', page + 1 >= _sekshi_history.lastPage);
   }
 
 }(jQuery));
