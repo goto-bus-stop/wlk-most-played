@@ -9,9 +9,9 @@ class HistoryPage
 {
     public function __construct()
     {
-        $this->collection = getMongoDb()->historyentries;
-        $this->media = getMongoDb()->media;
-        $this->users = getMongoDb()->users;
+        $this->collection = Mongo::collection('historyentries');
+        $this->media = Mongo::collection('media');
+        $this->users = Mongo::collection('users');
     }
 
     protected function getFilter()

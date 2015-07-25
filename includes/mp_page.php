@@ -15,8 +15,8 @@ class MostPlayedPage
      */
     public function __construct()
     {
-        $this->history = getMongoDb()->historyentries;
-        $this->media = getMongoDb()->media;
+        $this->history = Mongo::collection('historyentries');
+        $this->media = Mongo::collection('media');
     }
 
     /**
