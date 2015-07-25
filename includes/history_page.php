@@ -59,7 +59,7 @@ class HistoryPage
 
             $score = $entry['score'];
             $title = $media['author'] . ' - ' . $media['title'];
-            $time = $entry['time']->toDateTime()->format('Y-m-d H:i:s');
+            $time = date('Y-m-d H:i:s', $entry['time']->sec);
 
             $html .= '
                 <div class="history-entry">
