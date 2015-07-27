@@ -30,12 +30,13 @@ class Plugin
      */
     public static function menu()
     {
-        add_options_page(
-            'SekshiBot Most Played Songs Options',
-            'Most Played Songs',
+        add_menu_page(
+            'SekshiBot',
+            'SekshiBot',
             'activate_plugins',
-            'wlk-most-played',
-            'WeLoveKpop\MostPlayed\showOptionsPage'
+            'sekshibot',
+            'WeLoveKpop\MostPlayed\showOptionsPage',
+            plugins_url('../css/icons/sekshi.png', __FILE__)
         );
     }
 
