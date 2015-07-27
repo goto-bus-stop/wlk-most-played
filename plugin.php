@@ -18,7 +18,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/mongo.php';
 require_once plugin_dir_path(__FILE__) . 'includes/plugin.php';
 require_once plugin_dir_path(__FILE__) . 'includes/history_page.php';
 require_once plugin_dir_path(__FILE__) . 'includes/mp_page.php';
-require_once plugin_dir_path(__FILE__) . 'includes/options_page.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/admin_page.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/options_page.php';
 
 add_option('wlkmp_mongo_uri', 'mongodb://localhost:27017/');
 add_option('wlkmp_mongo_name', 'sekshi');

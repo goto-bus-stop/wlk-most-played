@@ -33,10 +33,20 @@ class Plugin
         add_menu_page(
             'SekshiBot',
             'SekshiBot',
-            'activate_plugins',
+            'read',
             'sekshibot',
-            'WeLoveKpop\MostPlayed\showOptionsPage',
+            'WeLoveKpop\MostPlayed\Admin\OptionsPage::show',
             plugins_url('../css/icons/sekshi.png', __FILE__)
+        );
+
+        // set submenu item name
+        add_submenu_page(
+            'sekshibot',
+            'SekshiBot Options',
+            'General',
+            'read',
+            'sekshibot',
+            'WeLoveKpop\MostPlayed\Admin\OptionsPage::show'
         );
     }
 

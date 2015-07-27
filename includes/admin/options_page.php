@@ -1,17 +1,24 @@
 <?php
-/**
- * Functions for building the Plugin Options page.
- */
 
-namespace WeLoveKpop\MostPlayed;
+namespace WeLoveKpop\MostPlayed\Admin;
 
-function showOptionsPage()
+use WeLoveKpop\MostPlayed\Mongo;
+
+class OptionsPage extends AdminPage
 {
-    $mongo_uri = esc_attr(get_option('wlkmp_mongo_uri'));
-    $mongo_name = esc_attr(get_option('wlkmp_mongo_name'));
-    ?>
-    <div class="wrap">
-        <h2><?php echo __('SekshiBot Most Played Songs Options') ?></h2>
+    /**
+     * Page title.
+     *
+     * @var string
+     */
+    protected $title = 'SekshiBot Options';
+
+    public function render()
+    {
+        $mongo_uri = get_option('wlkmp_mongo_uri');
+        $mongo_name = get_option('wlkmp_mongo_name');
+        ob_start();
+?>
         <form method="post" action="options.php">
             <?php settings_fields('wlkmp_options') ?>
             <?php do_settings_sections('wlkmp_options') ?>
@@ -22,7 +29,7 @@ function showOptionsPage()
                         <input type="text"
                                class="regular-text"
                                name="wlkmp_mongo_uri"
-                               value="<?php echo $mongo_uri ?>" />
+                               value="<?php echo esc_attr($mongo_uri) ?>" />
                     </td>
                 </tr>
                 <tr valign="top">
@@ -31,12 +38,13 @@ function showOptionsPage()
                         <input type="text"
                                class="regular-text"
                                name="wlkmp_mongo_name"
-                               value="<?php echo $mongo_name ?>" />
+                               value="<?php echo esc_attr($mongo_name) ?>" />
                     </td>
                 </tr>
             </table>
             <?php submit_button() ?>
         </form>
-    </div>
-    <?php
+<?php
+        return parent::renderPage(ob_get_clean());
+    }
 }
