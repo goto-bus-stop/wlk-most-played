@@ -48,6 +48,15 @@ class Plugin
             'sekshibot',
             'WeLoveKpop\MostPlayed\Admin\OptionsPage::show'
         );
+
+        add_submenu_page(
+            'sekshibot',
+            'SekshiBot - Media',
+            'Media',
+            'activate_plugins',
+            'sekshibot-media',
+            'WeLoveKpop\MostPlayed\Admin\MediaPage::show'
+        );
     }
 
     /**

@@ -4,7 +4,8 @@
  */
 namespace WeLoveKpop\MostPlayed;
 
-class Mongo {
+class Mongo
+{
 
     protected static $client;
 
@@ -43,5 +44,4 @@ class Mongo {
     {
         return self::db($db)->{$collectionName};
     }
-
 }
