@@ -150,14 +150,14 @@ class MediaPage extends AdminPage
         $count = Mongo::collection('media')->count($this->filter);
 
         $page = floor($start / $limit) + 1;
-        $pages = floor($count / $limit);
+        $pages = ceil($count / $limit);
         if ($page > 1) {
             $prev = '<a href="' . add_query_arg([ 'start' => $start - $limit ]) . '">Prev</a>';
         }
         else {
             $prev = 'Prev';
         }
-        if ($page <= $pages) {
+        if ($page < $pages) {
             $next = '<a href="' . add_query_arg([ 'start' => $start + $limit ]) . '">Next</a>';
         }
         else {
@@ -185,6 +185,12 @@ class MediaPage extends AdminPage
         ';
 
         $html = '
+            <form action="" method="get">
+                <input type="hidden" name="page" value="' . esc_attr($_GET['page']) . '">
+                <input type="text" name="search">
+                <button type="submit">Search</button>
+            </form>
+
             ' . $pagination . '
             <table id="sekshibot-media" style="width: 100%">
                 <thead> <tr>' . $header . '</tr> </thead>
@@ -262,7 +268,8 @@ class MediaPage extends AdminPage
     public static function show()
     {
         $start = isset($_GET['start']) ? (int) $_GET['start'] : 0;
-        $p = new self();
+        $search = isset($_GET['search']) ? [ 'search' => $_GET['search'] ] : null;
+        $p = new self($search);
         $p->enqueue();
         echo $p->render($start);
     }
