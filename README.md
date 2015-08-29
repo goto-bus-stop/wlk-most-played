@@ -4,6 +4,8 @@ WLK - Most Played
 WordPress plugin that shows media stats from your plug.dj room, tracked by
 [SekshiBot](https://github.com/welovekpop/SekshiBot).
 
+(Soon to be deprecated in favour of [sekshi-data](https://github.com/welovekpop/sekshi-data).)
+
 ## Installation
 
 You need the `php5-mongo` PHP extension installed and enabled.
